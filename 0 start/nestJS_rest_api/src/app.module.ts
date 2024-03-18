@@ -6,9 +6,9 @@ import { CityModule } from './city/city.module';
 
 @Module({
   imports: [UsersModule, CityModule],
-  // controllers: [AppController],
-  // providers: [AppService],
-  controllers: [],
-  providers: [],
+  controllers: [AppController],
+  providers: [AppService],
+  // controllers: [],
+  // providers: [],
 })
 export class AppModule {}
