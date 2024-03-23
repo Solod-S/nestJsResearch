@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { genSalt, hash } from 'bcrypt';
+import { updateUserDto } from './dto/updateUser.dto';
 
 import { User } from './user.entity';
 
@@ -13,12 +14,11 @@ export class UserService {
     // userRepository некая обстракция сервера
   }
   availableFields = ['email', 'nameFirst', 'nameLast', 'birthDate', 'gender'];
-  // helper
+
+  // helps to filter available fields
   private filterFields(body: { [k: string]: any }) {
     // body: { [k: string]: any } - обьект с различными значениями
-
     const filteredBody: { [k: string]: any } = {};
-
     Object.keys(body).filter((k) => {
       if (this.availableFields.includes(k)) {
         filteredBody[k] = body[k];
@@ -43,7 +43,7 @@ export class UserService {
   }
 
   //  Update user data whole
-  public async updateUser(id: number, body: any) {
+  public async updateUser(id: number, body: updateUserDto) {
     // const { email, nameFirst, nameLast, birthDate, gender } = body;
     const newUser = await this.userRepository.update(
       { id },
@@ -52,19 +52,30 @@ export class UserService {
     );
     return newUser;
   }
+
   //  Get all users data
   public async getAllUsersData() {
     const users = await this.userRepository.find({
-      select: ['id', 'email', 'nameFirst', 'nameLast', 'birthDate', 'gender'],
+      // select: ['id', 'email', 'nameFirst', 'nameLast', 'birthDate', 'gender'],
+      select: this.availableFields as any,
     });
     return users;
   }
 
   //  Get user data
   public async getUserData(id: number) {
-    const user = await this.userRepository.findOne({ where: { id } });
+    const user = await this.userRepository.findOne({
+      where: { id },
+      select: this.availableFields as any,
+    });
     // найди пользователя где id равен параметру
     console.log(`user`, user);
+    return user;
+  }
+
+  public async deleteUser(id: number) {
+    const user = await this.userRepository.delete(id);
+
     return user;
   }
 }

@@ -15,17 +15,20 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response, Request } from 'express';
 import { UserService } from './user.sevice';
+import { updateUserDto } from './dto/updateUser.dto';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {} // private readonly userService: UserService
 
+  //  Get all users
   @Get('/')
   async getAllUsers(@Res() res: Response, @Req() req: Request) {
     const users = await this.userService.getAllUsersData();
     res.send({ status: 'ok', data: users });
   }
 
+  //  Get by id
   @Get('/:id')
   async getUser(
     @Res() res: Response,
@@ -37,11 +40,12 @@ export class UserController {
   ) {
     const newUseData = await this.userService.getUserData(id);
 
-    delete newUseData.password;
+    // delete newUseData.password;
     // удаялем пароль
     return res.send({ status: 'ok', data: { newUseData } });
   }
 
+  //  Create user
   @Post('/')
   @UseInterceptors(FileInterceptor(''))
   // для получения formData в теле запроса
@@ -53,6 +57,7 @@ export class UserController {
     return res.send({ status: 'ok' });
   }
 
+  // Update user data
   @Put('/:id')
   async updateUser(
     @Res() res: Response,
@@ -60,12 +65,23 @@ export class UserController {
     @Body() body: any,
     @Req() req: Request,
   ) {
-    const user = await this.userService.updateUser(id, body);
+    await this.userService.updateUser(id, body);
     // delete user.password;
-    res.send({ status: 'ok', data: user });
+    res.send({ status: 'ok' });
   }
+
+  // Update user field
   @Patch('/:id')
   async updateUserField(@Res() res: Response, @Req() req: Request) {}
+
+  // Delete user
   @Delete('/:id')
-  async deleteUser(@Res() res: Response, @Req() req: Request) {}
+  async deleteUser(
+    @Res() res: Response,
+    @Req() req: Request,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    await this.userService.deleteUser(id);
+    res.send({ status: 'ok' });
+  }
 }
